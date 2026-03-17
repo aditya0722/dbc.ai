@@ -1,381 +1,263 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
 
-/// Model for notification data
+// ── Model (unchanged – same fields your dashboard already uses) ──────────────
 class NotificationItem {
   final String title;
   final String message;
   final String icon;
   final Color color;
-  final int displayDuration; // Duration in seconds
+  final int displayDuration; // seconds
 
-  NotificationItem({
+  const NotificationItem({
     required this.title,
     required this.message,
     required this.icon,
     required this.color,
-    this.displayDuration = 3,
+    required this.displayDuration,
   });
 }
 
-/// Rotating Notification Carousel Widget
-/// Mobile: Full-screen top slide animation (no loop, shows once)
-/// Desktop: Snackbar-style notification (no loop, shows once)
+// ── Widget ────────────────────────────────────────────────────────────────────
 class NotificationCarousel extends StatefulWidget {
   final List<NotificationItem> notifications;
-  final Duration transitionDuration;
-  final VoidCallback? onDismiss;
-  final bool autoPlay;
+  final VoidCallback onDismiss;
 
   const NotificationCarousel({
-    Key? key,
+    super.key,
     required this.notifications,
-    this.transitionDuration = const Duration(milliseconds: 600),
-    this.onDismiss,
-    this.autoPlay = true,
-  }) : super(key: key);
+    required this.onDismiss,
+  });
 
   @override
   State<NotificationCarousel> createState() => _NotificationCarouselState();
 }
 
 class _NotificationCarouselState extends State<NotificationCarousel>
-    with TickerProviderStateMixin {
-  late AnimationController _slideController;
-  late AnimationController _progressController;
-
+    with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
-  bool _isDesktop = false;
-  bool _isInitialized = false;
-  bool _hasFinished = false;
+  Timer? _cycleTimer;
+  late AnimationController _animController;
+  late Animation<Offset> _slideIn;
+  late Animation<Offset> _slideOut;
+  bool _isAnimatingOut = false;
 
   @override
   void initState() {
     super.initState();
 
-    _slideController = AnimationController(
-      duration: widget.transitionDuration,
+    _animController = AnimationController(
       vsync: this,
+      duration: const Duration(milliseconds: 380),
     );
 
-    _progressController = AnimationController(
-      vsync: this,
+    _slideIn = Tween<Offset>(
+      begin: const Offset(1.0, 0.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _slideOut = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(-1.0, 0.0),
+    ).animate(CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeInCubic,
+    ));
+
+    // Slide in the first card
+    _animController.forward();
+    _scheduleNext();
+  }
+
+  void _scheduleNext() {
+    if (widget.notifications.length <= 1) return;
+
+    final currentItem = widget.notifications[_currentIndex];
+    _cycleTimer?.cancel();
+    _cycleTimer = Timer(
+      Duration(seconds: currentItem.displayDuration + 1),
+      _advanceToNext,
     );
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  Future<void> _advanceToNext() async {
+    if (!mounted) return;
+    setState(() => _isAnimatingOut = true);
 
-    if (!_isInitialized) {
-      _isDesktop = MediaQuery.of(context).size.width > 600;
-      _isInitialized = true;
-
-      if (widget.autoPlay && widget.notifications.isNotEmpty && !_hasFinished) {
-        _startCycling();
-      }
-    }
-  }
-
-  void _startCycling() {
-    _cycleToNextNotification();
-  }
-
-  Future<void> _cycleToNextNotification() async {
-    if (!mounted || widget.notifications.isEmpty || _hasFinished) return;
-
-    final currentNotification = widget.notifications[_currentIndex];
-    final displayDuration =
-        Duration(seconds: currentNotification.displayDuration);
-
-    // Slide in animation
-    await _slideController.forward();
-
-    // Set up progress bar
-    _progressController.duration = displayDuration;
-    _progressController.forward(from: 0.0);
-
-    // Wait for display duration
-    await Future.delayed(displayDuration);
+    // Reverse = slide current card out to left
+    await _animController.reverse();
 
     if (!mounted) return;
+    setState(() {
+      _currentIndex = (_currentIndex + 1) % widget.notifications.length;
+      _isAnimatingOut = false;
+    });
 
-    // Slide out animation
-    await _slideController.reverse();
-
-    if (!mounted) return;
-
-    // Move to next notification
-    _currentIndex++;
-
-    // Check if we've shown all notifications
-    if (_currentIndex >= widget.notifications.length) {
-      setState(() {
-        _hasFinished = true;
-      });
-      if (widget.onDismiss != null) {
-        widget.onDismiss!();
-      }
-      return;
-    }
-
-    // Reset controllers for next notification
-    _slideController.reset();
-    _progressController.reset();
-
-    // Rebuild to show next notification
-    if (mounted) {
-      setState(() {});
-    }
-
-    // Continue to next notification
-    _cycleToNextNotification();
+    // Slide new card in from right
+    _animController.forward();
+    _scheduleNext();
   }
 
   @override
   void dispose() {
-    _slideController.dispose();
-    _progressController.dispose();
+    _cycleTimer?.cancel();
+    _animController.dispose();
     super.dispose();
+  }
+
+  IconData _resolveIcon(String name) {
+    const map = {
+      'payment': Icons.payment,
+      'security': Icons.security,
+      'inventory': Icons.inventory_2,
+      'warning': Icons.warning_amber_rounded,
+      'info': Icons.info_outline,
+      'check': Icons.check_circle_outline,
+    };
+    return map[name] ?? Icons.notifications_outlined;
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.notifications.isEmpty || _hasFinished) {
-      return const SizedBox.shrink();
-    }
+    final item = widget.notifications[_currentIndex];
 
-    return _isDesktop ? _buildDesktopSnackbar() : _buildMobileNotification();
-  }
-
-  /// Desktop: Snackbar-style notification
-  Widget _buildDesktopSnackbar() {
-    final theme = Theme.of(context);
-    final notification = widget.notifications[_currentIndex];
-
-    return FadeTransition(
-      opacity: Tween<double>(begin: 0.0, end: 1.0).animate(_slideController),
-      child: Container(
-        margin: EdgeInsets.all(2.w),
-        decoration: BoxDecoration(
-          color: notification.color,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.5.h),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        _getIcon(notification.icon),
-                        color: Colors.white,
-                        size: 26,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 2.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          notification.title,
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14.sp,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 0.4.h),
-                        Text(
-                          notification.message,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.85),
-                            fontSize: 12.sp,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 1.w),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _hasFinished = true;
-                      });
-                      if (widget.onDismiss != null) {
-                        widget.onDismiss!();
-                      }
-                    },
-                    child: Icon(
-                      Icons.close,
-                      color: Colors.white.withValues(alpha: 0.6),
-                      size: 20,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                ),
-                child: LinearProgressIndicator(
-                  value: _progressController.value,
-                  backgroundColor: Colors.white.withValues(alpha: 0.15),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Colors.white.withValues(alpha: 0.5),
-                  ),
-                  minHeight: 3,
-                ),
-              ),
-            ),
-          ],
+    return ClipRect(
+      child: SlideTransition(
+        position: _isAnimatingOut ? _slideOut : _slideIn,
+        child: _NotificationCard(
+          item: item,
+          resolveIcon: _resolveIcon,
+          total: widget.notifications.length,
+          currentIndex: _currentIndex,
+          onDismiss: widget.onDismiss,
         ),
       ),
     );
   }
+}
 
-  /// Mobile: Full-screen top slide animation
-  Widget _buildMobileNotification() {
-    final theme = Theme.of(context);
-    final notification = widget.notifications[_currentIndex];
+// ── Single card UI (Image 1 style) ────────────────────────────────────────────
+class _NotificationCard extends StatelessWidget {
+  final NotificationItem item;
+  final IconData Function(String) resolveIcon;
+  final int total;
+  final int currentIndex;
+  final VoidCallback onDismiss;
 
-    return SlideTransition(
-      position: Tween<Offset>(begin: const Offset(0.0, -1.0), end: const Offset(0.0, 0.0))
-          .animate(
-            CurvedAnimation(parent: _slideController, curve: Curves.easeOut),
+  const _NotificationCard({
+    required this.item,
+    required this.resolveIcon,
+    required this.total,
+    required this.currentIndex,
+    required this.onDismiss,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.07),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
-      child: Container(
-        width: 100.w,
-        color: notification.color,
-        child: Stack(
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(4.w, 2.h, 4.w, 1.5.h),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+            // ── Colored icon badge ──
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: item.color.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                resolveIcon(item.icon),
+                color: item.color,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // ── Title + message ──
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 12.w,
-                    height: 12.w,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
+                  Text(
+                    item.title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1A1A1A),
+                      height: 1.2,
                     ),
-                    child: Center(
-                      child: Icon(
-                        _getIcon(notification.icon),
-                        color: Colors.white,
-                        size: 7.w,
-                      ),
-                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(width: 3.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          notification.title,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14.sp,
+                  const SizedBox(height: 3),
+                  Text(
+                    item.message,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF6B6B6B),
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  // ── Dot indicators (if multiple notifications) ──
+                  if (total > 1) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: List.generate(total, (i) {
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          margin: const EdgeInsets.only(right: 4),
+                          width: i == currentIndex ? 16 : 6,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: i == currentIndex
+                                ? item.color
+                                : item.color.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(2),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 0.5.h),
-                        Text(
-                          notification.message,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontWeight: FontWeight.w400,
-                            fontSize: 11.sp,
-                            height: 1.3,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                        );
+                      }),
                     ),
-                  ),
-                  SizedBox(width: 2.w),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _hasFinished = true;
-                      });
-                      if (widget.onDismiss != null) {
-                        widget.onDismiss!();
-                      }
-                    },
-                    child: Icon(
-                      Icons.close,
-                      color: Colors.white.withValues(alpha: 0.6),
-                      size: 5.5.w,
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: LinearProgressIndicator(
-                value: _progressController.value,
-                backgroundColor: Colors.white.withValues(alpha: 0.15),
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Colors.white.withValues(alpha: 0.5),
+
+            // ── Dismiss ──
+            GestureDetector(
+              onTap: onDismiss,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                child: Icon(
+                  Icons.close,
+                  size: 18,
+                  color: const Color(0xFFBDBDBD),
                 ),
-                minHeight: 2,
               ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  IconData _getIcon(String iconName) {
-    final iconMap = {
-      'payment': Icons.attach_money,
-      'security': Icons.warning_amber_rounded,
-      'inventory': Icons.inventory_2,
-      'alert': Icons.notifications_active,
-      'check': Icons.check_circle,
-      'error': Icons.error_outline,
-      'info': Icons.info_outline,
-    };
-    return iconMap[iconName] ?? Icons.notifications;
   }
 }
