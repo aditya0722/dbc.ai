@@ -7,7 +7,7 @@ class NotificationItem {
   final String message;
   final String icon;
   final Color color;
-  final int displayDuration; // kept for compatibility, not used internally
+  final int displayDuration;
 
   const NotificationItem({
     required this.title,
@@ -36,18 +36,19 @@ class NotificationCarousel extends StatefulWidget {
 class _NotificationCarouselState extends State<NotificationCarousel>
     with TickerProviderStateMixin {
   int _currentIndex = 0;
+  bool _isVisible = true; // controls whether card is shown during interval gap
 
-  // Slides the card in from the LEFT → RIGHT
   late AnimationController _slideController;
   late Animation<Offset> _slideAnimation;
 
-  // Fills the progress bar over 5 seconds
   late AnimationController _progressController;
 
-  Timer? _holdTimer; // waits 10s before progress bar starts
+  Timer? _holdTimer;
+  Timer? _intervalTimer; // ← NEW: 5s gap between notifications
 
   static const int _holdSeconds = 10;
   static const int _progressSeconds = 5;
+  static const int _intervalSeconds = 5; // ← NEW
 
   @override
   void initState() {
@@ -59,7 +60,7 @@ class _NotificationCarouselState extends State<NotificationCarousel>
     );
 
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(-1.0, 0.0), // enters from left
+      begin: const Offset(0.0, -1.0),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _slideController,
@@ -71,17 +72,18 @@ class _NotificationCarouselState extends State<NotificationCarousel>
       duration: const Duration(seconds: _progressSeconds),
     )..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
-          _advanceToNext();
+          _slideOut(); // ← slide OUT first, then wait 5s, then show next
         }
       });
 
     _startCycle();
   }
 
-  /// Slide in → hold 10s → progress bar 5s → advance → repeat
+  /// Step 1: Slide in → hold 10s → progress bar 5s
   void _startCycle() {
     if (!mounted) return;
 
+    setState(() => _isVisible = true);
     _slideController.reset();
     _progressController.reset();
     _slideController.forward();
@@ -92,17 +94,32 @@ class _NotificationCarouselState extends State<NotificationCarousel>
     });
   }
 
-  void _advanceToNext() {
+  /// Step 2: Slide the card back UP (out of view)
+  void _slideOut() {
     if (!mounted) return;
-    setState(() {
-      _currentIndex = (_currentIndex + 1) % widget.notifications.length;
+    _slideController.reverse().then((_) {
+      if (!mounted) return;
+      setState(() => _isVisible = false); // hide completely during gap
+      _startInterval();                   // wait 5s before next
     });
-    _startCycle();
+  }
+
+  /// Step 3: Wait 5 seconds, then advance to next notification
+  void _startInterval() {
+    _intervalTimer?.cancel();
+    _intervalTimer = Timer(const Duration(seconds: _intervalSeconds), () {
+      if (!mounted) return;
+      setState(() {
+        _currentIndex = (_currentIndex + 1) % widget.notifications.length;
+      });
+      _startCycle(); // Step 1 again for next notification
+    });
   }
 
   @override
   void dispose() {
     _holdTimer?.cancel();
+    _intervalTimer?.cancel();
     _slideController.dispose();
     _progressController.dispose();
     super.dispose();
@@ -122,6 +139,9 @@ class _NotificationCarouselState extends State<NotificationCarousel>
 
   @override
   Widget build(BuildContext context) {
+    // During the 5s gap, render nothing
+    if (!_isVisible) return const SizedBox.shrink();
+
     final item = widget.notifications[_currentIndex];
 
     return ClipRect(
@@ -143,13 +163,11 @@ class _NotificationCarouselState extends State<NotificationCarousel>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ── Main row: icon + text + dismiss ──
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 12, 10, 8),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Colored icon badge
                     Container(
                       width: 44,
                       height: 44,
@@ -164,8 +182,6 @@ class _NotificationCarouselState extends State<NotificationCarousel>
                       ),
                     ),
                     const SizedBox(width: 12),
-
-                    // Title + subtitle
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,8 +212,6 @@ class _NotificationCarouselState extends State<NotificationCarousel>
                         ],
                       ),
                     ),
-
-                    // × dismiss button
                     GestureDetector(
                       onTap: widget.onDismiss,
                       child: const Padding(
@@ -212,14 +226,11 @@ class _NotificationCarouselState extends State<NotificationCarousel>
                   ],
                 ),
               ),
-
-              // ── Bottom row: progress bar + dot indicators ──
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Animated progress bar
                     Expanded(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(4),
@@ -235,8 +246,6 @@ class _NotificationCarouselState extends State<NotificationCarousel>
                         ),
                       ),
                     ),
-
-                    // Dot indicators (only if multiple notifications)
                     if (widget.notifications.length > 1) ...[
                       const SizedBox(width: 10),
                       Row(
