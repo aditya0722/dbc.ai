@@ -4,17 +4,13 @@ class DesktopSidebarWidget extends StatelessWidget {
   const DesktopSidebarWidget({
     super.key,
     required this.currentIndex,
-    required this.unreadCount,
     required this.navItems,
     required this.onTap,
-    required this.onNotificationTap,
   });
 
   final int currentIndex;
-  final int unreadCount;
   final List<Map<String, Object>> navItems;
   final ValueChanged<int> onTap;
-  final VoidCallback onNotificationTap;
 
   @override
   Widget build(BuildContext context) {
@@ -68,14 +64,6 @@ class DesktopSidebarWidget extends StatelessWidget {
               ),
             ),
 
-            // Notification bell at bottom
-            _SidebarItem(
-              icon: Icons.notifications_outlined,
-              label: 'Alerts',
-              isActive: false,
-              badge: unreadCount > 0 ? unreadCount : null,
-              onTap: onNotificationTap,
-            ),
             const SizedBox(height: 16),
           ],
         ),
@@ -90,14 +78,12 @@ class _SidebarItem extends StatelessWidget {
     required this.label,
     required this.isActive,
     required this.onTap,
-    this.badge,
   });
 
   final IconData icon;
   final String label;
   final bool isActive;
   final VoidCallback onTap;
-  final int? badge;
 
   @override
   Widget build(BuildContext context) {
@@ -108,42 +94,20 @@ class _SidebarItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: Column(
           children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: isActive
-                        ? const Color(0xFF6B46C1).withOpacity(0.1)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon,
-                      size: 22,
-                      color: isActive
-                          ? const Color(0xFF6B46C1)
-                          : const Color(0xFF9E9E9E)),
-                ),
-                if (badge != null)
-                  Positioned(
-                    right: -2,
-                    top: -2,
-                    child: Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: const BoxDecoration(
-                          color: Colors.red, shape: BoxShape.circle),
-                      child: Text(
-                        badge! > 9 ? '9+' : badge.toString(),
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-              ],
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isActive
+                    ? const Color(0xFF6B46C1).withOpacity(0.1)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon,
+                  size: 22,
+                  color: isActive
+                      ? const Color(0xFF6B46C1)
+                      : const Color(0xFF9E9E9E)),
             ),
             const SizedBox(height: 4),
             Text(label,

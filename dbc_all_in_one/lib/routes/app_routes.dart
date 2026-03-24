@@ -12,8 +12,6 @@ import '../presentation/invoice_management_center/invoice_management_center.dart
 import '../presentation/live_camera_view/live_camera_view.dart';
 import '../presentation/marketplace_product_catalog/marketplace_product_catalog.dart';
 import '../presentation/news_updates_hub/news_updates_hub.dart';
-import '../presentation/notification_center/notification_center.dart';
-import '../presentation/notification_center/notification_settings_screen.dart';
 import '../presentation/order_management_hub/order_management_hub.dart';
 import '../presentation/payment_processing_center/payment_processing_center.dart';
 import '../presentation/payroll_processing/payroll_processing.dart';
@@ -72,8 +70,7 @@ class AppRoutes {
       paymentProcessingCenter: (context) => const PaymentProcessingCenter(),
       gstFilingCenter: (context) => const GSTFilingCenter(),
       gstReports: (context) => const GSTReportsScreen(),
-      notificationCenter: (context) => const NotificationCenter(),
-      notificationSettings: (context) => const NotificationSettingsScreen(),
+
       dataMigrationCenter: (context) => const DataMigrationCenter(),
       invoiceManagementCenter: (context) => const InvoiceManagementCenter(),
       globalSearchCenter: (context) => const GlobalSearchCenter(),

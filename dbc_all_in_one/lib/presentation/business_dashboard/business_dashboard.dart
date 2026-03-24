@@ -2,21 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
-import '../../services/invoicing_service.dart';
-import '../../services/notification_service.dart';
 import '../../services/security_alerts_service.dart';
 import '../../services/session_manager.dart';
 import '../../widgets/custom_bottom_bar.dart';
 import '../live_camera_view/live_camera_view.dart';
 import '../inventory_management/inventory_management.dart';
 import '../staff_management/staff_management.dart';
-import './widgets/notification_carousel_widget.dart';
 import './widgets/security_notification_widget.dart';
 import './widgets/desktop_sidebar_widget.dart';
 import './widgets/desktop_right_panel_widget.dart';
 import './widgets/dashboard_tab_widget.dart';
 import './widgets/more_tab_widget.dart';
 import './widgets/show_create_invoice_dialog.dart';
+import '../../services/app_notifications.dart';
+import '../../core/app_notification.dart';
 
 class BusinessDashboard extends StatefulWidget {
   const BusinessDashboard({super.key});
@@ -27,19 +26,14 @@ class BusinessDashboard extends StatefulWidget {
 
 class _BusinessDashboardState extends State<BusinessDashboard> {
   int _currentNavIndex = 0;
-  bool _showNotificationCarousel = true;
 
   final String businessName = "DBC Cafe & Bistro";
 
-  late List<NotificationItem> _notificationItems;
-
   final SecurityAlertsService _alertsService = SecurityAlertsService();
   final SessionManager _sessionManager = SessionManager();
-  final NotificationService _notificationService = NotificationService();
 
   int _activeAlertsCount = 0;
-  OverlayEntry? _notificationOverlay;
-  int _unreadNotificationCount = 0;
+  OverlayEntry? _securityOverlay;
 
   static const _navItems = [
     {'icon': Icons.home_outlined, 'activeIcon': Icons.home, 'label': 'Home'},
@@ -64,48 +58,68 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
   @override
   void initState() {
     super.initState();
-    _initializeNotifications();
+
     _checkForSecurityAlerts();
-    _loadUnreadNotificationCount();
+
+    // 🔥 AUTO DEMO NOTIFICATIONS
+    _triggerDemoNotifications();
   }
 
-  void _initializeNotifications() {
-    _notificationItems = [
-      NotificationItem(
-        title: 'Payment Received ✓',
-        message: 'Customer paid \$2,450.00 for Invoice #INV-2024-001',
-        icon: 'payment',
-        color: const Color(0xFF10B981),
-        displayDuration: 2,
-      ),
-      NotificationItem(
-        title: 'Security Alert ⚠️',
-        message: 'Unauthorized access detected in CCTV zone 3 - Please review',
-        icon: 'security',
-        color: const Color(0xFFEF4444),
-        displayDuration: 5,
-      ),
-      NotificationItem(
-        title: 'Low Inventory Alert',
-        message: 'Espresso Beans stock below 10 units - Reorder recommended',
-        icon: 'inventory',
-        color: const Color(0xFFF59E0B),
-        displayDuration: 3,
-      ),
-    ];
-  }
+  void _triggerDemoNotifications() {
+    // Delay ensures UI is fully built
+    Future.delayed(const Duration(seconds: 1), () {
+      if (!mounted) return;
 
-  Future<void> _loadUnreadNotificationCount() async {
-    try {
-      final count = await _notificationService.getUnreadCount();
-      if (mounted) setState(() => _unreadNotificationCount = count);
-    } catch (_) {}
+      AppNotifications.show(
+        context,
+        AppNotification(
+          message: "₹1,250 payment received successfully",
+          type: AppNotificationType.payment,
+        ),
+      );
+    });
+
+    Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) return;
+
+      AppNotifications.show(
+        context,
+        AppNotification(
+          message: "Motion detected near entrance",
+          type: AppNotificationType.security,
+        ),
+      );
+    });
+
+    Future.delayed(const Duration(seconds: 5), () {
+      if (!mounted) return;
+
+      AppNotifications.show(
+        context,
+        AppNotification(
+          message: "Only 5 items left in stock",
+          type: AppNotificationType.inventory,
+        ),
+      );
+    });
+
+    Future.delayed(const Duration(seconds: 7), () {
+      if (!mounted) return;
+
+      AppNotifications.show(
+        context,
+        AppNotification(
+          message: "Rahul marked absent today",
+          type: AppNotificationType.employee,
+        ),
+      );
+    });
   }
 
   @override
   void dispose() {
-    _notificationOverlay?.remove();
-    _notificationOverlay = null;
+    _securityOverlay?.remove();
+    _securityOverlay = null;
     super.dispose();
   }
 
@@ -127,22 +141,22 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
   }
 
   void _showSecurityNotification() {
-    _notificationOverlay?.remove();
-    _notificationOverlay = OverlayEntry(
+    _securityOverlay?.remove();
+    _securityOverlay = OverlayEntry(
       builder: (context) => SecurityNotificationWidget(
         alertsCount: _activeAlertsCount,
         onTap: () {
-          _notificationOverlay?.remove();
-          _notificationOverlay = null;
+          _securityOverlay?.remove();
+          _securityOverlay = null;
           Navigator.pushNamed(context, AppRoutes.securityAlertsDashboard);
         },
         onDismiss: () {
-          _notificationOverlay?.remove();
-          _notificationOverlay = null;
+          _securityOverlay?.remove();
+          _securityOverlay = null;
         },
       ),
     );
-    Overlay.of(context).insert(_notificationOverlay!);
+    Overlay.of(context).insert(_securityOverlay!);
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -166,18 +180,14 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
       backgroundColor: const Color(0xFFF0F1F5),
       body: Row(
         children: [
-          // Left sidebar
+          // Left sidebar — no notification count needed
           DesktopSidebarWidget(
             currentIndex: _currentNavIndex,
-            unreadCount: _unreadNotificationCount,
             navItems: _navItems,
             onTap: (i) => setState(() => _currentNavIndex = i),
-            onNotificationTap: () =>
-                Navigator.pushNamed(context, AppRoutes.notificationCenter)
-                    .then((_) => _loadUnreadNotificationCount()),
           ),
 
-          // Center content — capped at 780px, never stretches
+          // Center content — capped at 780px
           Expanded(
             child: Center(
               child: ConstrainedBox(
@@ -201,13 +211,8 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
             ),
           ),
 
-          // Right panel
-          DesktopRightPanelWidget(
-            unreadCount: _unreadNotificationCount,
-            onNotificationTap: () =>
-                Navigator.pushNamed(context, AppRoutes.notificationCenter)
-                    .then((_) => _loadUnreadNotificationCount()),
-          ),
+          // Right panel — no notification count needed
+          const DesktopRightPanelWidget(),
         ],
       ),
     );
@@ -231,39 +236,6 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
                     fontWeight: FontWeight.w700,
                     fontSize: 18),
               ),
-              actions: [
-                Stack(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.notifications_outlined,
-                          color: Color(0xFF1A1A1A)),
-                      onPressed: () => Navigator.pushNamed(
-                              context, AppRoutes.notificationCenter)
-                          .then((_) => _loadUnreadNotificationCount()),
-                    ),
-                    if (_unreadNotificationCount > 0)
-                      Positioned(
-                        right: 8,
-                        top: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                              color: Colors.red, shape: BoxShape.circle),
-                          child: Text(
-                            _unreadNotificationCount > 99
-                                ? '99+'
-                                : _unreadNotificationCount.toString(),
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
             ),
       body: _getScreen(),
       floatingActionButton: FloatingActionButton.extended(
@@ -288,17 +260,9 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
       case 0:
         return DashboardTabWidget(
           businessName: businessName,
-          notificationItems: _notificationItems,
-          showNotificationCarousel: _showNotificationCarousel,
           activeAlertsCount: _activeAlertsCount,
-          unreadNotificationCount: _unreadNotificationCount,
-          onDismissCarousel: () =>
-              setState(() => _showNotificationCarousel = false),
           onViewAll: () => setState(() => _currentNavIndex = 4),
           onRefresh: _handleRefresh,
-          onNotificationTap: () =>
-              Navigator.pushNamed(context, AppRoutes.notificationCenter)
-                  .then((_) => _loadUnreadNotificationCount()),
         );
       case 1:
         return const LiveCameraView();

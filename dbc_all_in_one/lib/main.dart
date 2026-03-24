@@ -5,6 +5,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'presentation/splash_screen/splash_screen.dart';
 import 'presentation/business_dashboard/business_dashboard.dart';
 
+// ✅ ADD THIS (GLOBAL KEY)
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -29,6 +32,7 @@ class MyApp extends StatelessWidget {
     return Sizer(
       builder: (context, orientation, deviceType) {
         return MaterialApp(
+          navigatorKey: navigatorKey, // ✅ ADD THIS
           debugShowCheckedModeBanner: false,
           title: 'dbc_all_in_one',
           home: const SplashScreen(),

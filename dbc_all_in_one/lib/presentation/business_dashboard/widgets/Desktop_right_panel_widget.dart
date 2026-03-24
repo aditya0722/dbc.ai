@@ -2,14 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/app_export.dart';
 
 class DesktopRightPanelWidget extends StatelessWidget {
-  const DesktopRightPanelWidget({
-    super.key,
-    required this.unreadCount,
-    required this.onNotificationTap,
-  });
-
-  final int unreadCount;
-  final VoidCallback onNotificationTap;
+  const DesktopRightPanelWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -244,8 +237,7 @@ class _QuickLink extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                       color: Color(0xFF1A1A1A))),
             ),
-            const Icon(Icons.chevron_right,
-                size: 14, color: Color(0xFFCCCCCC)),
+            const Icon(Icons.chevron_right, size: 14, color: Color(0xFFCCCCCC)),
           ],
         ),
       ),

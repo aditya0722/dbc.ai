@@ -1,31 +1,20 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/app_export.dart';
-import './notification_carousel_widget.dart';
 
 class DashboardTabWidget extends StatelessWidget {
   const DashboardTabWidget({
     super.key,
     required this.businessName,
-    required this.notificationItems,
-    required this.showNotificationCarousel,
     required this.activeAlertsCount,
-    required this.unreadNotificationCount,
-    required this.onDismissCarousel,
     required this.onViewAll,
     required this.onRefresh,
-    required this.onNotificationTap,
   });
 
   final String businessName;
-  final List<NotificationItem> notificationItems;
-  final bool showNotificationCarousel;
   final int activeAlertsCount;
-  final int unreadNotificationCount;
-  final VoidCallback onDismissCarousel;
   final VoidCallback onViewAll;
   final Future<void> Function() onRefresh;
-  final VoidCallback onNotificationTap;
 
   // ── Data ──
   static final List<Map<String, dynamic>> _primaryMetrics = [
@@ -97,25 +86,9 @@ class DashboardTabWidget extends StatelessWidget {
             slivers: [
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
-              // Notification carousel
-              if (showNotificationCarousel && notificationItems.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                    child: NotificationCarousel(
-                      notifications: notificationItems,
-                      onDismiss: onDismissCarousel,
-                    ),
-                  ),
-                ),
-
               // Welcome header
               SliverToBoxAdapter(
-                child: _WelcomeHeader(
-                  businessName: businessName,
-                  unreadCount: unreadNotificationCount,
-                  onNotificationTap: onNotificationTap,
-                ),
+                child: _WelcomeHeader(businessName: businessName),
               ),
 
               // Alerts banner
@@ -174,7 +147,7 @@ class DashboardTabWidget extends StatelessWidget {
 
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
-              // Management grid — always 2 columns (content is already capped)
+              // Management grid
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 sliver: SliverGrid(
@@ -213,15 +186,9 @@ class DashboardTabWidget extends StatelessWidget {
 
 // ── Welcome header ──────────────────────────────────────────
 class _WelcomeHeader extends StatelessWidget {
-  const _WelcomeHeader({
-    required this.businessName,
-    required this.unreadCount,
-    required this.onNotificationTap,
-  });
+  const _WelcomeHeader({required this.businessName});
 
   final String businessName;
-  final int unreadCount;
-  final VoidCallback onNotificationTap;
 
   @override
   Widget build(BuildContext context) {
@@ -252,34 +219,6 @@ class _WelcomeHeader extends StatelessWidget {
             onPressed: () =>
                 Navigator.pushNamed(context, AppRoutes.globalSearchCenter),
           ),
-          const SizedBox(width: 8),
-          Stack(
-            children: [
-              _CircleIconButton(
-                  icon: Icons.notifications_outlined,
-                  onPressed: onNotificationTap),
-              if (unreadCount > 0)
-                Positioned(
-                  right: 6,
-                  top: 6,
-                  child: Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: const BoxDecoration(
-                        color: Colors.red, shape: BoxShape.circle),
-                    constraints:
-                        const BoxConstraints(minWidth: 14, minHeight: 14),
-                    child: Text(
-                      unreadCount > 99 ? '99+' : unreadCount.toString(),
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-            ],
-          ),
         ],
       ),
     );
@@ -287,8 +226,7 @@ class _WelcomeHeader extends StatelessWidget {
 }
 
 class _CircleIconButton extends StatelessWidget {
-  const _CircleIconButton(
-      {required this.icon, required this.onPressed});
+  const _CircleIconButton({required this.icon, required this.onPressed});
 
   final IconData icon;
   final VoidCallback onPressed;
