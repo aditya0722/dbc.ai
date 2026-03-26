@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_strategy/url_strategy.dart';
 import 'presentation/splash_screen/splash_screen.dart';
 import 'presentation/business_dashboard/business_dashboard.dart';
 import 'presentation/payment_processing_center/payment_processing_center.dart';
@@ -15,6 +16,11 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Remove the '#' from web URLs (use path URL strategy)
+  try {
+    setPathUrlStrategy();
+  } catch (_) {}
 
   // ✅ REQUIRED: Supabase MUST be initialized
   await Supabase.initialize(
@@ -42,12 +48,17 @@ class MyApp extends StatelessWidget {
           title: 'dbc_all_in_one',
           home: const SplashScreen(),
           routes: {
-    '/payment-processing-center': (context) => const PaymentProcessingCenter(),
-  '/order-management-hub': (context) => const OrderManagementHub(),
-  '/staff-management': (context) => const StaffManagement(),
-  '/inventory-management': (context) => const InventoryManagement(),
-  '/live-camera-view': (context) => const LiveCameraView(),
-  },
+            '/payment-processing-center': (context) =>
+                const BusinessDashboard(initialIndex: 4),
+            '/order-management-hub': (context) =>
+                const BusinessDashboard(initialIndex: 5),
+            '/staff-management': (context) =>
+                const BusinessDashboard(initialIndex: 3),
+            '/inventory-management': (context) =>
+                const BusinessDashboard(initialIndex: 2),
+            '/live-camera-view': (context) =>
+                const BusinessDashboard(initialIndex: 1),
+          },
         );
       },
     );

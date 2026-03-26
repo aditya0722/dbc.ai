@@ -15,7 +15,7 @@ class DashboardTabWidget extends StatelessWidget {
   final String businessName;
   final int activeAlertsCount;
   final VoidCallback onViewAll;
-  final VoidCallback? onPaymentsTap; 
+  final VoidCallback? onPaymentsTap;
   final Future<void> Function() onRefresh;
 
   // ── Data ──
@@ -32,7 +32,7 @@ class DashboardTabWidget extends StatelessWidget {
       "value": "24 Active",
       "trend": "+ 8 today",
       "trendUp": true,
-      "route": "/order-management-hub",
+      "route": "/payment-processing-center",
     },
   ];
 
@@ -394,14 +394,12 @@ class _AlertsBanner extends StatelessWidget {
             child: Text(
               '$alertsCount CCTV Alert${alertsCount > 1 ? 's' : ''} Active',
               style: const TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13),
+                  color: Colors.red, fontWeight: FontWeight.w600, fontSize: 13),
             ),
           ),
           GestureDetector(
-            onTap: () => Navigator.pushNamed(
-                context, AppRoutes.securityAlertsDashboard),
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.securityAlertsDashboard),
             child: const Text('View',
                 style: TextStyle(
                     color: Colors.red,
@@ -439,8 +437,8 @@ class _FeaturedBanner extends StatelessWidget {
               bottom: -10,
               child: Opacity(
                 opacity: 0.15,
-                child: Icon(Icons.restaurant_menu,
-                    size: 100, color: Colors.white),
+                child:
+                    Icon(Icons.restaurant_menu, size: 100, color: Colors.white),
               ),
             ),
             Padding(
@@ -456,8 +454,8 @@ class _FeaturedBanner extends StatelessWidget {
                           fontWeight: FontWeight.w700)),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),

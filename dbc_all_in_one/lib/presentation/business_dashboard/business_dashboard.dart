@@ -113,8 +113,8 @@ class _StaffNotificationWidgetState extends State<StaffNotificationWidget>
         vsync: this, duration: const Duration(milliseconds: 380));
     _slide = Tween<Offset>(begin: const Offset(0, -0.15), end: Offset.zero)
         .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
-    _fade =
-        Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+    _fade = Tween<double>(begin: 0, end: 1)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
     _ctrl.forward();
 
     // Auto-dismiss after 6 seconds
@@ -158,8 +158,8 @@ class _StaffNotificationWidgetState extends State<StaffNotificationWidget>
                 children: [
                   // Header
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     decoration: const BoxDecoration(
                       color: Color(0xffF5F3FF),
                       borderRadius:
@@ -189,8 +189,7 @@ class _StaffNotificationWidgetState extends State<StaffNotificationWidget>
                             Text(
                                 "${widget.alerts.where((a) => !a.isRead).length} new notifications",
                                 style: const TextStyle(
-                                    fontSize: 11,
-                                    color: Color(0xff6B7280))),
+                                    fontSize: 11, color: Color(0xff6B7280))),
                           ],
                         ),
                         const Spacer(),
@@ -225,10 +224,10 @@ class _StaffNotificationWidgetState extends State<StaffNotificationWidget>
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: const BoxDecoration(
-                        border: Border(
-                            top: BorderSide(color: Color(0xffE5E7EB))),
-                        borderRadius: BorderRadius.vertical(
-                            bottom: Radius.circular(16)),
+                        border:
+                            Border(top: BorderSide(color: Color(0xffE5E7EB))),
+                        borderRadius:
+                            BorderRadius.vertical(bottom: Radius.circular(16)),
                       ),
                       child: const Center(
                         child: Text("View All Staff Alerts",
@@ -252,8 +251,7 @@ class _StaffNotificationWidgetState extends State<StaffNotificationWidget>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: const BoxDecoration(
-          border:
-              Border(bottom: BorderSide(color: Color(0xffF3F4F8)))),
+          border: Border(bottom: BorderSide(color: Color(0xffF3F4F8)))),
       child: Row(
         children: [
           Container(
@@ -297,14 +295,16 @@ class _StaffNotificationWidgetState extends State<StaffNotificationWidget>
 // ─────────────────────────────────────────────────────────────
 
 class BusinessDashboard extends StatefulWidget {
-  const BusinessDashboard({super.key});
+  final int initialIndex;
+
+  const BusinessDashboard({super.key, this.initialIndex = 0});
 
   @override
   State<BusinessDashboard> createState() => _BusinessDashboardState();
 }
 
 class _BusinessDashboardState extends State<BusinessDashboard> {
-  int _currentNavIndex = 0;
+  late int _currentNavIndex;
 
   final String businessName = "DBC Cafe & Bistro";
 
@@ -343,8 +343,7 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
     ),
   ];
 
-  int get _unreadStaffAlerts =>
-      _staffAlerts.where((a) => !a.isRead).length;
+  int get _unreadStaffAlerts => _staffAlerts.where((a) => !a.isRead).length;
 
   // ── Nav items (now includes Payments) ─────────────────────
   static const _navItems = [
@@ -383,6 +382,7 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
   @override
   void initState() {
     super.initState();
+    _currentNavIndex = widget.initialIndex;
     _checkForSecurityAlerts();
     _triggerDemoNotifications();
   }
@@ -447,8 +447,7 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
 
   Future<void> _checkForSecurityAlerts() async {
     try {
-      final hasShown =
-          await _sessionManager.wasAlertShownInCurrentSession();
+      final hasShown = await _sessionManager.wasAlertShownInCurrentSession();
       if (hasShown) return;
       final count = await _alertsService.getActiveAlertsCount();
       setState(() => _activeAlertsCount = count);
@@ -520,9 +519,7 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth > 700;
-        return isDesktop
-            ? _buildDesktopScaffold()
-            : _buildMobileScaffold();
+        return isDesktop ? _buildDesktopScaffold() : _buildMobileScaffold();
       },
     );
   }
@@ -865,10 +862,22 @@ class _MobileBottomBarWithBadge extends StatelessWidget {
 
   static const _items = [
     {'icon': Icons.home_outlined, 'active': Icons.home, 'label': 'Home'},
-    {'icon': Icons.security_outlined, 'active': Icons.security, 'label': 'Security'},
-    {'icon': Icons.inventory_2_outlined, 'active': Icons.inventory_2, 'label': 'Stock'},
+    {
+      'icon': Icons.security_outlined,
+      'active': Icons.security,
+      'label': 'Security'
+    },
+    {
+      'icon': Icons.inventory_2_outlined,
+      'active': Icons.inventory_2,
+      'label': 'Stock'
+    },
     {'icon': Icons.people_outline, 'active': Icons.people, 'label': 'Staff'},
-    {'icon': Icons.account_balance_wallet_outlined, 'active': Icons.account_balance_wallet, 'label': 'Payments'},
+    {
+      'icon': Icons.account_balance_wallet_outlined,
+      'active': Icons.account_balance_wallet,
+      'label': 'Payments'
+    },
   ];
 
   @override
@@ -911,9 +920,8 @@ class _MobileBottomBarWithBadge extends StatelessWidget {
                           item['label'] as String,
                           style: TextStyle(
                             fontSize: 10,
-                            fontWeight: isActive
-                                ? FontWeight.w700
-                                : FontWeight.w500,
+                            fontWeight:
+                                isActive ? FontWeight.w700 : FontWeight.w500,
                             color: isActive
                                 ? const Color(0xff6D28D9)
                                 : const Color(0xff9CA3AF),
