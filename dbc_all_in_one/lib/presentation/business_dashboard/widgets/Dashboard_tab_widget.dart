@@ -32,7 +32,7 @@ class DashboardTabWidget extends StatelessWidget {
       "value": "24 Active",
       "trend": "+ 8 today",
       "trendUp": true,
-      "route": "/payment-processing-center",
+      "route": "/order-management-hub",
     },
   ];
 

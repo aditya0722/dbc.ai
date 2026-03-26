@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
             '/payment-processing-center': (context) =>
                 const BusinessDashboard(initialIndex: 4),
             '/order-management-hub': (context) =>
-                const BusinessDashboard(initialIndex: 5),
+                const BusinessDashboard(initialIndex: 6),
             '/staff-management': (context) =>
                 const BusinessDashboard(initialIndex: 3),
             '/inventory-management': (context) =>

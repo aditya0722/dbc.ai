@@ -17,6 +17,7 @@ import './widgets/more_tab_widget.dart';
 import './widgets/show_create_invoice_dialog.dart';
 import '../../services/app_notifications.dart';
 import '../../core/app_notification.dart';
+import '../order_management_hub/order_management_hub.dart';
 
 // ─────────────────────────────────────────────────────────────
 //  Staff Notification Model
@@ -677,6 +678,8 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
         return const PaymentProcessingCenter();
       case 5:
         return const MoreTabWidget();
+      case 6:
+        return const OrderManagementHub();
       default:
         return const SizedBox();
     }
