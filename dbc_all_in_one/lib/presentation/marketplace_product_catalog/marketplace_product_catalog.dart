@@ -4,6 +4,7 @@ import 'package:sizer/sizer.dart';
 import '../../core/app_export.dart';
 import '../../services/marketplace_service.dart';
 import '../../widgets/custom_bottom_bar.dart';
+import '../../widgets/dbc_back_button.dart';
 import '../../widgets/custom_icon_widget.dart';
 import './widgets/category_filter_widget.dart';
 import './widgets/filter_drawer_widget.dart';
@@ -72,18 +73,17 @@ class _MarketplaceProductCatalogState extends State<MarketplaceProductCatalog> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder:
-          (context) => FilterDrawerWidget(
-            selectedCondition: _selectedCondition,
-            selectedSort: _sortBy,
-            onApplyFilters: (condition, sort) {
-              setState(() {
-                _selectedCondition = condition;
-                _sortBy = sort;
-              });
-              _loadProducts();
-            },
-          ),
+      builder: (context) => FilterDrawerWidget(
+        selectedCondition: _selectedCondition,
+        selectedSort: _sortBy,
+        onApplyFilters: (condition, sort) {
+          setState(() {
+            _selectedCondition = condition;
+            _sortBy = sort;
+          });
+          _loadProducts();
+        },
+      ),
     );
   }
 
@@ -102,6 +102,11 @@ class _MarketplaceProductCatalogState extends State<MarketplaceProductCatalog> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
+        leading: DBCBackButton(
+          onPressed: () => Navigator.maybePop(context),
+          iconColor: theme.colorScheme.onSurface,
+          backgroundColor: Colors.white,
+        ),
         title: Text(
           'Marketplace',
           style: theme.textTheme.titleLarge?.copyWith(
@@ -133,20 +138,19 @@ class _MarketplaceProductCatalogState extends State<MarketplaceProductCatalog> {
                   color: theme.colorScheme.onSurfaceVariant,
                   size: 24,
                 ),
-                suffixIcon:
-                    _searchController.text.isNotEmpty
-                        ? IconButton(
-                          icon: CustomIconWidget(
-                            iconName: 'close',
-                            color: theme.colorScheme.onSurfaceVariant,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            _searchController.clear();
-                            _loadProducts();
-                          },
-                        )
-                        : null,
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: CustomIconWidget(
+                          iconName: 'close',
+                          color: theme.colorScheme.onSurfaceVariant,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          _searchController.clear();
+                          _loadProducts();
+                        },
+                      )
+                    : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                 ),
@@ -179,50 +183,49 @@ class _MarketplaceProductCatalogState extends State<MarketplaceProductCatalog> {
 
           // Products grid
           Expanded(
-            child:
-                _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _products.isEmpty
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _products.isEmpty
                     ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CustomIconWidget(
-                            iconName: 'inventory_2',
-                            color: theme.colorScheme.onSurfaceVariant,
-                            size: 64,
-                          ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            'No products found',
-                            style: theme.textTheme.titleMedium?.copyWith(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CustomIconWidget(
+                              iconName: 'inventory_2',
                               color: theme.colorScheme.onSurfaceVariant,
+                              size: 64,
                             ),
-                          ),
-                        ],
-                      ),
-                    )
-                    : RefreshIndicator(
-                      onRefresh: _loadProducts,
-                      child: GridView.builder(
-                        padding: EdgeInsets.all(4.w),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 3.w,
-                          mainAxisSpacing: 2.h,
-                          childAspectRatio: 0.75,
+                            SizedBox(height: 2.h),
+                            Text(
+                              'No products found',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
                         ),
-                        itemCount: _products.length,
-                        itemBuilder: (context, index) {
-                          return ProductCardWidget(
-                            product: _products[index],
-                            onTap:
-                                () =>
-                                    _navigateToProductDetails(_products[index]),
-                          );
-                        },
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _loadProducts,
+                        child: GridView.builder(
+                          padding: EdgeInsets.all(4.w),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 3.w,
+                            mainAxisSpacing: 2.h,
+                            childAspectRatio: 0.75,
+                          ),
+                          itemCount: _products.length,
+                          itemBuilder: (context, index) {
+                            return ProductCardWidget(
+                              product: _products[index],
+                              onTap: () =>
+                                  _navigateToProductDetails(_products[index]),
+                            );
+                          },
+                        ),
                       ),
-                    ),
           ),
         ],
       ),

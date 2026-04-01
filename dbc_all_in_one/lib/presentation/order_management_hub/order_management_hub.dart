@@ -6,6 +6,7 @@ import '../../services/marketplace_service.dart';
 import '../../widgets/custom_bottom_bar.dart';
 import './widgets/order_card_widget.dart';
 import './widgets/status_filter_chip_widget.dart';
+import '../../widgets/dbc_back_button.dart';
 
 class OrderManagementHub extends StatefulWidget {
   const OrderManagementHub({super.key});
@@ -47,14 +48,13 @@ class _OrderManagementHubState extends State<OrderManagementHub>
   Future<void> _loadOrders() async {
     setState(() => _isLoading = true);
     try {
-      final orders =
-          _tabController.index == 0
-              ? await _marketplaceService.getMyOrders(
-                status: _selectedStatus == 'all' ? null : _selectedStatus,
-              )
-              : await _marketplaceService.getMySales(
-                status: _selectedStatus == 'all' ? null : _selectedStatus,
-              );
+      final orders = _tabController.index == 0
+          ? await _marketplaceService.getMyOrders(
+              status: _selectedStatus == 'all' ? null : _selectedStatus,
+            )
+          : await _marketplaceService.getMySales(
+              status: _selectedStatus == 'all' ? null : _selectedStatus,
+            );
 
       setState(() {
         _orders = orders;
@@ -75,33 +75,32 @@ class _OrderManagementHubState extends State<OrderManagementHub>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder:
-          (context) => _OrderDetailsSheet(
-            order: order,
-            isSeller: _tabController.index == 1,
-            onStatusUpdate: (newStatus) async {
-              try {
-                await _marketplaceService.updateOrderStatus(
-                  order['id'],
-                  newStatus,
-                );
-                _loadOrders();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Order status updated to $newStatus'),
-                    ),
-                  );
-                }
-              } catch (error) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to update status: $error')),
-                  );
-                }
-              }
-            },
-          ),
+      builder: (context) => _OrderDetailsSheet(
+        order: order,
+        isSeller: _tabController.index == 1,
+        onStatusUpdate: (newStatus) async {
+          try {
+            await _marketplaceService.updateOrderStatus(
+              order['id'],
+              newStatus,
+            );
+            _loadOrders();
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Order status updated to $newStatus'),
+                ),
+              );
+            }
+          } catch (error) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to update status: $error')),
+              );
+            }
+          }
+        },
+      ),
     );
   }
 
@@ -112,6 +111,11 @@ class _OrderManagementHubState extends State<OrderManagementHub>
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
+        leading: DBCBackButton(
+          onPressed: () => Navigator.maybePop(context),
+          iconColor: theme.colorScheme.onSurface,
+          backgroundColor: Colors.white,
+        ),
         title: Text(
           'Order Management',
           style: theme.textTheme.titleLarge?.copyWith(

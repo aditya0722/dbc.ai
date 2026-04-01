@@ -4,6 +4,7 @@ import 'package:sizer/sizer.dart';
 import '../../core/app_export.dart';
 import '../../routes/app_routes.dart';
 import '../../services/global_search_service.dart';
+import '../../widgets/dbc_back_button.dart';
 import './widgets/advanced_filter_sheet_widget.dart';
 import './widgets/module_tab_widget.dart';
 import './widgets/search_result_card_widget.dart';
@@ -174,9 +175,10 @@ class _GlobalSearchCenterState extends State<GlobalSearchCenter> {
                 children: [
                   Row(
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back),
+                      DBCBackButton(
                         onPressed: () => Navigator.pop(context),
+                        iconColor: Colors.black87,
+                        backgroundColor: Colors.white,
                       ),
                       Expanded(
                         child: Container(

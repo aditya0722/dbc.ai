@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../services/hiring_service.dart';
+import '../../widgets/dbc_back_button.dart';
 import './widgets/add_position_dialog_widget.dart';
 import './widgets/application_status_chip_widget.dart';
 import './widgets/job_position_card_widget.dart';
@@ -91,6 +92,11 @@ class _StaffHiringScreenState extends State<StaffHiringScreen>
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        leading: DBCBackButton(
+          onPressed: () => Navigator.maybePop(context),
+          iconColor: Colors.black87,
+          backgroundColor: Colors.white,
+        ),
         title: Text(
           'Staff Hiring',
           style: TextStyle(

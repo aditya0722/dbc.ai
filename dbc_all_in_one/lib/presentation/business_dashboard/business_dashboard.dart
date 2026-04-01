@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
+import '../../routes/app_routes.dart';
 import '../../services/security_alerts_service.dart';
 import '../../services/session_manager.dart';
 import '../../widgets/custom_bottom_bar.dart';
@@ -444,6 +445,42 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
     super.dispose();
   }
 
+  /// Navigate to a top-level dashboard index using named routes on web
+  /// and replace the current route so browser history updates.
+  void _navigateToIndex(int i) {
+    String? route;
+    switch (i) {
+      case 0:
+        route = AppRoutes.businessDashboard;
+        break;
+      case 1:
+        route = AppRoutes.liveCameraView;
+        break;
+      case 2:
+        route = AppRoutes.inventoryManagement;
+        break;
+      case 3:
+        route = AppRoutes.staffManagement;
+        break;
+      case 4:
+        route = AppRoutes.paymentProcessingCenter;
+        break;
+      case 5:
+        route = AppRoutes.orderManagementHub;
+        break;
+      default:
+        route = null;
+    }
+
+    if (route != null) {
+      Navigator.pushReplacementNamed(context, route);
+    } else {
+      setState(() => _currentNavIndex = i);
+    }
+
+    if (i == 3) _markStaffAlertsRead();
+  }
+
   // ── Security alerts ───────────────────────────────────────
 
   Future<void> _checkForSecurityAlerts() async {
@@ -496,7 +533,7 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
         onViewAll: () {
           _staffOverlay?.remove();
           _staffOverlay = null;
-          setState(() => _currentNavIndex = 3); // Go to Staff tab
+          _navigateToIndex(3); // Go to Staff tab via named route
         },
       ),
     );
@@ -539,10 +576,7 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
             currentIndex: _currentNavIndex,
             navItems: _navItems,
             staffBadgeCount: _unreadStaffAlerts,
-            onTap: (i) {
-              setState(() => _currentNavIndex = i);
-              if (i == 3) _markStaffAlertsRead();
-            },
+            onTap: (i) => _navigateToIndex(i),
           ),
 
           // Center content — capped at 780px
@@ -553,16 +587,17 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
                 child: Stack(
                   children: [
                     _getScreen(),
-                    Positioned(
-                      bottom: 24,
-                      right: 24,
-                      child: FloatingActionButton.extended(
-                        onPressed: () => showCreateInvoiceDialog(context),
-                        backgroundColor: const Color(0xFF10B981),
-                        icon: const Icon(Icons.receipt_long),
-                        label: const Text('Bill'),
+                    if (_currentNavIndex == 0)
+                      Positioned(
+                        bottom: 24,
+                        right: 24,
+                        child: FloatingActionButton.extended(
+                          onPressed: () => showCreateInvoiceDialog(context),
+                          backgroundColor: const Color(0xFF10B981),
+                          icon: const Icon(Icons.receipt_long),
+                          label: const Text('Bill'),
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -636,19 +671,18 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
                   : null,
             ),
       body: _getScreen(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showCreateInvoiceDialog(context),
-        backgroundColor: const Color(0xFF10B981),
-        icon: const Icon(Icons.receipt_long),
-        label: const Text('Bill'),
-      ),
+      floatingActionButton: _currentNavIndex == 0
+          ? FloatingActionButton.extended(
+              onPressed: () => showCreateInvoiceDialog(context),
+              backgroundColor: const Color(0xFF10B981),
+              icon: const Icon(Icons.receipt_long),
+              label: const Text('Bill'),
+            )
+          : null,
       bottomNavigationBar: _MobileBottomBarWithBadge(
         currentIndex: _currentNavIndex,
         staffBadgeCount: _unreadStaffAlerts,
-        onTap: (i) {
-          setState(() => _currentNavIndex = i);
-          if (i == 3) _markStaffAlertsRead();
-        },
+        onTap: (i) => _navigateToIndex(i),
       ),
     );
   }
@@ -663,10 +697,10 @@ class _BusinessDashboardState extends State<BusinessDashboard> {
         return DashboardTabWidget(
           businessName: businessName,
           activeAlertsCount: _activeAlertsCount,
-          onViewAll: () => setState(() => _currentNavIndex = 5),
+          onViewAll: () => _navigateToIndex(5),
           onRefresh: _handleRefresh,
           // Pass callback so tapping Total Payments card navigates here:
-          onPaymentsTap: () => setState(() => _currentNavIndex = 4),
+          onPaymentsTap: () => _navigateToIndex(4),
         );
       case 1:
         return const LiveCameraView();

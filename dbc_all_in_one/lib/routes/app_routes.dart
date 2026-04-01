@@ -9,7 +9,6 @@ import '../presentation/gst_reports/gst_reports.dart';
 import '../presentation/hiring_marketplace/hiring_marketplace.dart';
 import '../presentation/inventory_management/inventory_management.dart';
 import '../presentation/invoice_management_center/invoice_management_center.dart';
-import '../presentation/live_camera_view/live_camera_view.dart';
 import '../presentation/marketplace_product_catalog/marketplace_product_catalog.dart';
 import '../presentation/news_updates_hub/news_updates_hub.dart';
 import '../presentation/order_management_hub/order_management_hub.dart';

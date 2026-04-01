@@ -51,6 +51,14 @@ class CustomBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Default route mapping for indices when caller doesn't provide `onTap`.
+    const List<String> _defaultRoutes = [
+      '/business-dashboard',
+      '/live-camera-view',
+      '/inventory-management',
+      '/staff-management',
+      '/business-dashboard',
+    ];
     return Container(
       decoration: BoxDecoration(
         color: _bgColor,
@@ -73,7 +81,19 @@ class CustomBottomBar extends StatelessWidget {
 
               return Expanded(
                 child: GestureDetector(
-                  onTap: () => onTap?.call(index),
+                  onTap: () {
+                    if (onTap != null) {
+                      onTap!.call(index);
+                      return;
+                    }
+                    // Fallback: navigate using named routes so web history updates
+                    final route = (index >= 0 && index < _defaultRoutes.length)
+                        ? _defaultRoutes[index]
+                        : null;
+                    if (route != null) {
+                      Navigator.pushReplacementNamed(context, route);
+                    }
+                  },
                   behavior: HitTestBehavior.opaque,
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
@@ -104,9 +124,8 @@ class CustomBottomBar extends StatelessWidget {
                           duration: const Duration(milliseconds: 200),
                           style: TextStyle(
                             fontSize: 10.5,
-                            fontWeight: isActive
-                                ? FontWeight.w700
-                                : FontWeight.w500,
+                            fontWeight:
+                                isActive ? FontWeight.w700 : FontWeight.w500,
                             color: isActive ? _activeColor : _inactiveColor,
                             letterSpacing: 0.2,
                           ),
@@ -119,9 +138,7 @@ class CustomBottomBar extends StatelessWidget {
                           width: isActive ? 18 : 0,
                           height: 3,
                           decoration: BoxDecoration(
-                            color: isActive
-                                ? _activeColor
-                                : Colors.transparent,
+                            color: isActive ? _activeColor : Colors.transparent,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
