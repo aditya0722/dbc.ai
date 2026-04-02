@@ -9,7 +9,7 @@ import './widgets/filing_timeline_card_widget.dart';
 import './widgets/gst_overview_card_widget.dart';
 import './widgets/period_selector_widget.dart';
 import './widgets/quick_action_button_widget.dart';
-
+import '../../widgets/dbc_back_button.dart';
 /// GST Filing Center - Comprehensive tax management with cloud-based GST calculation
 class GSTFilingCenter extends StatefulWidget {
   const GSTFilingCenter({super.key});
@@ -72,13 +72,11 @@ class _GSTFilingCenterState extends State<GSTFilingCenter> {
               floating: false,
               backgroundColor: theme.colorScheme.primary,
               expandedHeight: 12.h,
-              leading: IconButton(
-                icon: CustomIconWidget(
-                  iconName: 'arrow_back',
-                  color: theme.colorScheme.onPrimary,
-                  size: 24,
-                ),
-                onPressed: () => Navigator.pop(context),
+              leading: DBCBackButton(
+                onPressed: () => Navigator.maybePop(context),
+                iconColor: theme.colorScheme.onPrimary,
+                backgroundColor: Colors.transparent,
+                iconSize: 24,
               ),
               flexibleSpace: FlexibleSpaceBar(
                 title: Text(

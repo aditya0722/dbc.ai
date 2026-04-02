@@ -5,6 +5,7 @@ import '../../core/app_export.dart';
 import '../../services/marketplace_service.dart';
 import '../../widgets/custom_bottom_bar.dart';
 import '../../widgets/custom_icon_widget.dart';
+import '../../widgets/dbc_back_button.dart';
 import './widgets/add_listing_dialog_widget.dart';
 import './widgets/vendor_listing_card_widget.dart';
 
@@ -75,14 +76,13 @@ class _VendorProductManagementState extends State<VendorProductManagement> {
       );
 
       setState(() {
-        _listings =
-            allListings
-                .where(
-                  (l) =>
-                      _selectedStatus == 'all' ||
-                      l['listing_status'] == _selectedStatus,
-                )
-                .toList();
+        _listings = allListings
+            .where(
+              (l) =>
+                  _selectedStatus == 'all' ||
+                  l['listing_status'] == _selectedStatus,
+            )
+            .toList();
         _statistics = dashboardData['statistics'] as Map<String, dynamic>?;
         _isLoading = false;
       });
@@ -125,93 +125,91 @@ class _VendorProductManagementState extends State<VendorProductManagement> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Create Vendor Profile'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Vendor Name',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  TextField(
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Contact Email',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  TextField(
-                    controller: phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: 'Contact Phone',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  TextField(
-                    controller: addressController,
-                    decoration: const InputDecoration(
-                      labelText: 'Business Address',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 2,
-                  ),
-                ],
+      builder: (context) => AlertDialog(
+        title: const Text('Create Vendor Profile'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Vendor Name',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            actions: [
-              ElevatedButton(
-                onPressed: () async {
-                  try {
-                    await _marketplaceService.createVendor(
-                      name: nameController.text,
-                      contactEmail: emailController.text,
-                      contactPhone: phoneController.text,
-                      address: addressController.text,
-                    );
-                    if (mounted) {
-                      Navigator.pop(context);
-                      await _loadVendorData();
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Failed to create vendor: $e'),
-                          backgroundColor: theme.colorScheme.error,
-                        ),
-                      );
-                    }
-                  }
-                },
-                child: const Text('Create'),
+              SizedBox(height: 2.h),
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Contact Email',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 2.h),
+              TextField(
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Contact Phone',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 2.h),
+              TextField(
+                controller: addressController,
+                decoration: const InputDecoration(
+                  labelText: 'Business Address',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
               ),
             ],
           ),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                await _marketplaceService.createVendor(
+                  name: nameController.text,
+                  contactEmail: emailController.text,
+                  contactPhone: phoneController.text,
+                  address: addressController.text,
+                );
+                if (mounted) {
+                  Navigator.pop(context);
+                  await _loadVendorData();
+                }
+              } catch (e) {
+                if (mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to create vendor: $e'),
+                      backgroundColor: theme.colorScheme.error,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Create'),
+          ),
+        ],
+      ),
     );
   }
 
   void _showAddListingDialog() {
     showDialog(
       context: context,
-      builder:
-          (context) => AddListingDialogWidget(
-            vendorId: _selectedVendorId!,
-            onListingCreated: () async {
-              await _loadListings(_selectedVendorId!);
-            },
-          ),
+      builder: (context) => AddListingDialogWidget(
+        vendorId: _selectedVendorId!,
+        onListingCreated: () async {
+          await _loadListings(_selectedVendorId!);
+        },
+      ),
     );
   }
 
@@ -223,69 +221,68 @@ class _VendorProductManagementState extends State<VendorProductManagement> {
 
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(
-              'Update Stock - ${listing['marketplace_products']['product_name']}',
-            ),
-            content: TextField(
-              controller: stockController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Current Stock',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  try {
-                    final newStock = int.tryParse(stockController.text) ?? 0;
-                    String availabilityStatus;
-                    if (newStock == 0) {
-                      availabilityStatus = 'out_of_stock';
-                    } else if (newStock < 10) {
-                      availabilityStatus = 'low_stock';
-                    } else {
-                      availabilityStatus = 'in_stock';
-                    }
-
-                    await _marketplaceService.updateMarketplaceListing(
-                      listingId: listing['id'] as String,
-                      currentStock: newStock,
-                      availabilityStatus: availabilityStatus,
-                    );
-
-                    if (mounted) {
-                      Navigator.pop(context);
-                      await _loadListings(_selectedVendorId!);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Stock updated successfully'),
-                          backgroundColor: Color(0xFF10B981),
-                        ),
-                      );
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Failed to update stock: $e'),
-                          backgroundColor: theme.colorScheme.error,
-                        ),
-                      );
-                    }
-                  }
-                },
-                child: const Text('Update'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Update Stock - ${listing['marketplace_products']['product_name']}',
+        ),
+        content: TextField(
+          controller: stockController,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            labelText: 'Current Stock',
+            border: OutlineInputBorder(),
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                final newStock = int.tryParse(stockController.text) ?? 0;
+                String availabilityStatus;
+                if (newStock == 0) {
+                  availabilityStatus = 'out_of_stock';
+                } else if (newStock < 10) {
+                  availabilityStatus = 'low_stock';
+                } else {
+                  availabilityStatus = 'in_stock';
+                }
+
+                await _marketplaceService.updateMarketplaceListing(
+                  listingId: listing['id'] as String,
+                  currentStock: newStock,
+                  availabilityStatus: availabilityStatus,
+                );
+
+                if (mounted) {
+                  Navigator.pop(context);
+                  await _loadListings(_selectedVendorId!);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Stock updated successfully'),
+                      backgroundColor: Color(0xFF10B981),
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to update stock: $e'),
+                      backgroundColor: theme.colorScheme.error,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Update'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -346,11 +343,21 @@ class _VendorProductManagementState extends State<VendorProductManagement> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Vendor Management',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                  Row(
+                    children: [
+                      DBCBackButton(
+                        onPressed: () => Navigator.pop(context),
+                        iconColor: theme.colorScheme.onSurface,
+                        backgroundColor: Colors.white,
+                      ),
+                      SizedBox(width: 2.w),
+                      Text(
+                        'Vendor Management',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
                   if (_statistics != null) ...[
                     SizedBox(height: 2.h),
@@ -426,73 +433,66 @@ class _VendorProductManagementState extends State<VendorProductManagement> {
             ),
             // Listings
             Expanded(
-              child:
-                  _isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : RefreshIndicator(
-                        onRefresh: _handleRefresh,
-                        child:
-                            _listings.isEmpty
-                                ? Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      CustomIconWidget(
-                                        iconName: 'inventory_2',
-                                        color:
-                                            theme.colorScheme.onSurfaceVariant,
-                                        size: 64,
-                                      ),
-                                      SizedBox(height: 2.h),
-                                      Text(
-                                        'No listings found',
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                              color:
-                                                  theme
-                                                      .colorScheme
-                                                      .onSurfaceVariant,
-                                            ),
-                                      ),
-                                    ],
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : RefreshIndicator(
+                      onRefresh: _handleRefresh,
+                      child: _listings.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CustomIconWidget(
+                                    iconName: 'inventory_2',
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    size: 64,
                                   ),
-                                )
-                                : ListView.builder(
-                                  padding: EdgeInsets.all(4.w),
-                                  itemCount: _listings.length,
-                                  itemBuilder: (context, index) {
-                                    final listing = _listings[index];
-                                    return VendorListingCardWidget(
-                                      listing: listing,
-                                      onUpdateStock:
-                                          () => _showUpdateStockDialog(listing),
-                                      onToggleVisibility:
-                                          () => _toggleVisibility(listing),
-                                    );
-                                  },
-                                ),
-                      ),
+                                  SizedBox(height: 2.h),
+                                  Text(
+                                    'No listings found',
+                                    style:
+                                        theme.textTheme.titleMedium?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ListView.builder(
+                              padding: EdgeInsets.all(4.w),
+                              itemCount: _listings.length,
+                              itemBuilder: (context, index) {
+                                final listing = _listings[index];
+                                return VendorListingCardWidget(
+                                  listing: listing,
+                                  onUpdateStock: () =>
+                                      _showUpdateStockDialog(listing),
+                                  onToggleVisibility: () =>
+                                      _toggleVisibility(listing),
+                                );
+                              },
+                            ),
+                    ),
             ),
           ],
         ),
       ),
-      floatingActionButton:
-          _selectedVendorId != null
-              ? FloatingActionButton.extended(
-                onPressed: _showAddListingDialog,
-                icon: CustomIconWidget(
-                  iconName: 'add',
+      floatingActionButton: _selectedVendorId != null
+          ? FloatingActionButton.extended(
+              onPressed: _showAddListingDialog,
+              icon: CustomIconWidget(
+                iconName: 'add',
+                color: theme.colorScheme.onPrimary,
+                size: 24,
+              ),
+              label: Text(
+                'Add Product',
+                style: theme.textTheme.labelLarge?.copyWith(
                   color: theme.colorScheme.onPrimary,
-                  size: 24,
                 ),
-                label: Text(
-                  'Add Product',
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              )
-              : null,
+              ),
+            )
+          : null,
       bottomNavigationBar: CustomBottomBar(
         currentIndex: 2,
         onTap: (index) {
@@ -560,20 +560,18 @@ class _VendorProductManagementState extends State<VendorProductManagement> {
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 1.h),
         decoration: BoxDecoration(
-          color:
-              isSelected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.surfaceContainerHighest,
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
           style: theme.textTheme.labelMedium?.copyWith(
-            color:
-                isSelected
-                    ? theme.colorScheme.onPrimary
-                    : theme.colorScheme.onSurface,
+            color: isSelected
+                ? theme.colorScheme.onPrimary
+                : theme.colorScheme.onSurface,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           ),
         ),

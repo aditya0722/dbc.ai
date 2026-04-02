@@ -5,6 +5,7 @@ import '../../services/invoicing_service.dart';
 import './widgets/date_range_selector_widget.dart';
 import './widgets/invoice_timeline_card_widget.dart';
 import './widgets/payment_status_filter_chip_widget.dart';
+import '../../widgets/dbc_back_button.dart';
 
 class InvoiceManagementCenter extends StatefulWidget {
   const InvoiceManagementCenter({super.key});
@@ -142,6 +143,13 @@ class _InvoiceManagementCenterState extends State<InvoiceManagementCenter> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: DBCBackButton(
+          onPressed: () => Navigator.maybePop(context),
+          iconColor: Theme.of(context).canvasColor == Colors.white
+              ? Colors.black87
+              : Colors.white,
+          backgroundColor: Colors.transparent,
+        ),
         title: Text(
           'Invoice Management',
           style: TextStyle(

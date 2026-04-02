@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../widgets/dbc_back_button.dart';
 
 /// Payment Processing Center — Redesigned for compact, elegant UX
 /// Design: Dark-accented financial dashboard with teal/emerald palette
@@ -54,7 +55,7 @@ class _PaymentProcessingCenterState extends State<PaymentProcessingCenter>
     {
       'id': 'TXN001',
       'amount': 1250.00,
-      'recipient': 'Acme Corp',
+      'recipient': 'Rahul Kumar',
       'initials': 'AC',
       'method': 'credit_card',
       'status': 'pending',
@@ -68,9 +69,9 @@ class _PaymentProcessingCenterState extends State<PaymentProcessingCenter>
     {
       'id': 'TXN002',
       'amount': 3500.00,
-      'recipient': 'Tech Solutions Inc',
+      'recipient': 'Amit Kumar',
       'initials': 'TS',
-      'method': 'bank_transfer',
+      'method': 'QR_code',
       'status': 'processing',
       'date': 'Dec 13, 09:15 AM',
       'description': 'Service invoice',
@@ -82,9 +83,9 @@ class _PaymentProcessingCenterState extends State<PaymentProcessingCenter>
     {
       'id': 'TXN003',
       'amount': 850.00,
-      'recipient': 'Digital Marketing Co',
+      'recipient': 'Amit Kumar',
       'initials': 'DM',
-      'method': 'digital_wallet',
+      'method': 'QR code',
       'status': 'completed',
       'date': 'Dec 12, 03:45 PM',
       'description': 'Ad campaign payment',
@@ -96,7 +97,7 @@ class _PaymentProcessingCenterState extends State<PaymentProcessingCenter>
     {
       'id': 'TXN004',
       'amount': 500.00,
-      'recipient': 'Office Supplies Ltd',
+      'recipient': 'Amit Kumar',
       'initials': 'OS',
       'method': 'cash',
       'status': 'pending',
@@ -109,7 +110,7 @@ class _PaymentProcessingCenterState extends State<PaymentProcessingCenter>
     {
       'id': 'TXN005',
       'amount': 2200.00,
-      'recipient': 'Cloud Services Provider',
+      'recipient': 'Rohan Sharma',
       'initials': 'CS',
       'method': 'credit_card',
       'status': 'failed',
@@ -124,9 +125,9 @@ class _PaymentProcessingCenterState extends State<PaymentProcessingCenter>
     {
       'id': 'TXN006',
       'amount': 720.00,
-      'recipient': 'Creative Studio',
+      'recipient': 'Aditya Verma',
       'initials': 'CR',
-      'method': 'bank_transfer',
+      'method': 'QR_code',
       'status': 'completed',
       'date': 'Dec 11, 02:00 PM',
       'description': 'Design retainer',
@@ -214,19 +215,16 @@ class _PaymentProcessingCenterState extends State<PaymentProcessingCenter>
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.maybePop(context),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: _bg,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded,
-                  size: 16, color: _textDark),
-            ),
+          // Use shared back button for consistent appearance and a11y
+          // Matches security styling while preserving responsive tap target
+          DBCBackButton(
+            onPressed: () => Navigator.maybePop(context),
+            backgroundColor: _bg,
+            iconColor: const Color(0xFF1A1A1A),
+            iconSize: 16.0,
           ),
+
+          const SizedBox.shrink(),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -526,9 +524,7 @@ class _PaymentProcessingCenterState extends State<PaymentProcessingCenter>
                 const SizedBox(width: 6),
                 _chip('Credit Card', 'credit_card'),
                 const SizedBox(width: 6),
-                _chip('Bank Transfer', 'bank_transfer'),
-                const SizedBox(width: 6),
-                _chip('Digital Wallet', 'digital_wallet'),
+                _chip('QR Code', 'QR_code'),
                 const SizedBox(width: 6),
                 _chip('Cash', 'cash'),
               ],
@@ -940,10 +936,8 @@ class _PaymentProcessingCenterState extends State<PaymentProcessingCenter>
     switch (method) {
       case 'credit_card':
         return const Color(0xFF6366F1);
-      case 'bank_transfer':
+      case 'QR_code':
         return const Color(0xFF0EA5E9);
-      case 'digital_wallet':
-        return const Color(0xFFF59E0B);
       case 'cash':
         return const Color(0xFF10B981);
       default:
@@ -970,10 +964,8 @@ class _PaymentProcessingCenterState extends State<PaymentProcessingCenter>
     switch (method) {
       case 'credit_card':
         return 'Credit Card';
-      case 'bank_transfer':
-        return 'Bank Transfer';
-      case 'digital_wallet':
-        return 'Wallet';
+      case 'QR_code':
+        return 'QR Code';
       case 'cash':
         return 'Cash';
       default:

@@ -73,52 +73,67 @@ class _AppNotificationWidgetState extends State<AppNotificationWidget>
         parent: _controller,
         curve: Curves.easeOut,
       )),
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          width: 320,
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.12),
-                blurRadius: 12,
-              )
-            ],
-            border: Border(
-              left: BorderSide(
-                width: 5,
-                color: widget.color,
+      child: Dismissible(
+        key: ValueKey(widget.message),
+        direction: DismissDirection.horizontal,
+        onDismissed: (_) {
+          widget.onDismiss();
+        },
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 320,
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.12),
+                  blurRadius: 12,
+                )
+              ],
+              border: Border(
+                left: BorderSide(
+                  width: 5,
+                  color: widget.color,
+                ),
               ),
             ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Icon(_getIcon(), color: widget.color),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      widget.message,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Icon(_getIcon(), color: widget.color),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        widget.message,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              LinearProgressIndicator(
-                value: progress,
-                backgroundColor: Colors.grey.shade200,
-                valueColor: AlwaysStoppedAnimation(widget.color),
-              ),
-            ],
+                    // Close button
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 20),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: widget.onDismiss,
+                      tooltip: 'Dismiss',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: Colors.grey.shade200,
+                  valueColor: AlwaysStoppedAnimation(widget.color),
+                ),
+              ],
+            ),
           ),
         ),
       ),

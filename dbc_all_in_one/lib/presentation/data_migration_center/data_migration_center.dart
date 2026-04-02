@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/dbc_back_button.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../services/data_migration_service.dart';
@@ -111,9 +112,10 @@ class _DataMigrationCenterState extends State<DataMigrationCenter> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.pop(context),
+        leading: DBCBackButton(
+          onPressed: () => Navigator.maybePop(context),
+          iconColor: Colors.black87,
+          backgroundColor: Colors.white,
         ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

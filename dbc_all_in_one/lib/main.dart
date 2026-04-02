@@ -10,6 +10,7 @@ import 'presentation/staff_management/staff_management.dart';
 import 'presentation/live_camera_view/live_camera_view.dart';
 import 'presentation/inventory_management/inventory_management.dart';
 import 'presentation/order_management_hub/order_management_hub.dart';
+import 'routes/app_routes.dart';
 
 // ✅ ADD THIS (GLOBAL KEY)
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -43,22 +44,11 @@ class MyApp extends StatelessWidget {
     return Sizer(
       builder: (context, orientation, deviceType) {
         return MaterialApp(
-          navigatorKey: navigatorKey, // ✅ ADD THIS
+          navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           title: 'dbc_all_in_one',
-          home: const SplashScreen(),
-          routes: {
-            '/payment-processing-center': (context) =>
-                const BusinessDashboard(initialIndex: 4),
-            '/order-management-hub': (context) =>
-                const BusinessDashboard(initialIndex: 6),
-            '/staff-management': (context) =>
-                const BusinessDashboard(initialIndex: 3),
-            '/inventory-management': (context) =>
-                const BusinessDashboard(initialIndex: 2),
-            '/live-camera-view': (context) =>
-                const BusinessDashboard(initialIndex: 1),
-          },
+          initialRoute: AppRoutes.initial,
+          routes: AppRoutes.routes,
         );
       },
     );

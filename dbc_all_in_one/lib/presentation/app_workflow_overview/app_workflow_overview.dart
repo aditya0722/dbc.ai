@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import '../../widgets/dbc_back_button.dart';
 
 import '../../core/app_export.dart';
 import '../../routes/app_routes.dart';
@@ -210,9 +211,10 @@ class _AppWorkflowOverviewState extends State<AppWorkflowOverview> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.grey[900]),
-          onPressed: () => Navigator.pop(context),
+        leading: DBCBackButton(
+          onPressed: () => Navigator.maybePop(context),
+          iconColor: Colors.grey[900]!,
+          backgroundColor: Colors.white,
         ),
         actions: [
           IconButton(

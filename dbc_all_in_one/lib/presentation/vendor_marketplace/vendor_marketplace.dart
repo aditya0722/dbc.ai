@@ -4,6 +4,7 @@ import 'package:sizer/sizer.dart';
 import '../../core/app_export.dart';
 import '../../widgets/custom_bottom_bar.dart';
 import '../../widgets/custom_icon_widget.dart';
+import '../../widgets/dbc_back_button.dart';
 import './widgets/category_chip_widget.dart';
 import './widgets/search_header_widget.dart';
 import './widgets/vendor_card_widget.dart';
@@ -48,7 +49,8 @@ class _VendorMarketplaceState extends State<VendorMarketplace>
       "deliveryTime": "1-2 days",
       "commission": "8%",
       "category": "Equipment",
-      "logo": "https://img.rocket.new/generatedImages/rocket_gen_img_1b801991c-1764668078116.png",
+      "logo":
+          "https://img.rocket.new/generatedImages/rocket_gen_img_1b801991c-1764668078116.png",
       "semanticLabel":
           "Modern commercial kitchen with stainless steel appliances and professional cooking equipment",
       "isFavorite": false,
@@ -77,8 +79,7 @@ class _VendorMarketplaceState extends State<VendorMarketplace>
       "deliveryTime": "3-5 hours",
       "commission": "7%",
       "category": "Office",
-      "logo":
-          "https://images.unsplash.com/photo-1424392904403-8e1c65a6133a",
+      "logo": "https://images.unsplash.com/photo-1424392904403-8e1c65a6133a",
       "semanticLabel":
           "Modern office workspace with laptop, notebooks, pens, and coffee cup on wooden desk",
       "isFavorite": false,
@@ -92,8 +93,7 @@ class _VendorMarketplaceState extends State<VendorMarketplace>
       "deliveryTime": "4-6 hours",
       "commission": "9%",
       "category": "Maintenance",
-      "logo":
-          "https://images.unsplash.com/photo-1676311396794-f14881e9daaa",
+      "logo": "https://images.unsplash.com/photo-1676311396794-f14881e9daaa",
       "semanticLabel":
           "Professional maintenance tools including wrench, screwdriver, and measuring tape on workbench",
       "isFavorite": false,
@@ -184,6 +184,11 @@ class _VendorMarketplaceState extends State<VendorMarketplace>
       appBar: AppBar(
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
+        leading: DBCBackButton(
+          onPressed: () => Navigator.maybePop(context),
+          iconColor: theme.colorScheme.onSurface,
+          backgroundColor: Colors.white,
+        ),
         title: Text(
           'Vendor Marketplace',
           style: theme.textTheme.titleLarge?.copyWith(

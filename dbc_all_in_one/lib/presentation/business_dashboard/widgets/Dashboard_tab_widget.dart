@@ -447,7 +447,7 @@ class _FeaturedBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Plan your weekend menu',
+                  const Text('File GST for Free',
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -462,7 +462,7 @@ class _FeaturedBanner extends StatelessWidget {
                       border: Border.all(
                           color: Colors.white.withOpacity(0.5), width: 1),
                     ),
-                    child: const Text('NEW FEATURE',
+                    child: const Text('Cloud based GST calculation and filing',
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 11,

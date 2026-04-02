@@ -39,12 +39,14 @@ class NewsPosterCardWidget extends StatelessWidget {
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(16),
                   ),
-                  child: CustomImageWidget(
-                    imageUrl: newsItem['imageUrl'],
-                    semanticLabel: newsItem['semanticLabel'],
-                    width: double.infinity,
-                    height: 22.h,
-                    fit: BoxFit.cover,
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: CustomImageWidget(
+                      imageUrl: newsItem['imageUrl'],
+                      semanticLabel: newsItem['semanticLabel'],
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 Positioned(

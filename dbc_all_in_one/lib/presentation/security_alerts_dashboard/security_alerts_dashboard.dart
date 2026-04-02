@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import '../../widgets/dbc_back_button.dart';
+import '../../routes/app_routes.dart';
 
 import '../../services/security_alerts_service.dart';
 import './widgets/alert_card_widget.dart';
@@ -139,14 +141,13 @@ class _SecurityAlertsDashboardState extends State<SecurityAlertsDashboard> {
     final active = _alerts.where((a) => a['status'] == 'active').toList();
     if (active.isEmpty) return null;
     const order = ['critical', 'high', 'medium', 'low'];
-    active.sort((a, b) =>
-        order.indexOf(a['severity']) - order.indexOf(b['severity']));
+    active.sort(
+        (a, b) => order.indexOf(a['severity']) - order.indexOf(b['severity']));
     return active.first;
   }
 
   // Quick stat counts derived from alerts
-  int get _activeCount =>
-      _alerts.where((a) => a['status'] == 'active').length;
+  int get _activeCount => _alerts.where((a) => a['status'] == 'active').length;
   int get _investigatingCount =>
       _alerts.where((a) => a['status'] == 'investigating').length;
   int get _resolvedCount =>
@@ -162,8 +163,7 @@ class _SecurityAlertsDashboardState extends State<SecurityAlertsDashboard> {
         color: const Color(0xFF6B46C1),
         child: _isLoading
             ? const Center(
-                child:
-                    CircularProgressIndicator(color: Color(0xFF6B46C1)))
+                child: CircularProgressIndicator(color: Color(0xFF6B46C1)))
             : ListView(
                 padding: const EdgeInsets.fromLTRB(0, 12, 0, 80),
                 children: [
@@ -258,9 +258,17 @@ class _SecurityAlertsDashboardState extends State<SecurityAlertsDashboard> {
       backgroundColor: Colors.white,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A1A)),
-        onPressed: () => Navigator.pop(context),
+      leading: DBCBackButton(
+        onPressed: () async {
+          final didPop = await Navigator.maybePop(context);
+          if (!didPop) {
+            Navigator.pushReplacementNamed(
+                context, AppRoutes.businessDashboard);
+          }
+        },
+        backgroundColor: Colors.white,
+        iconColor: const Color(0xFF1A1A1A),
+        iconSize: 20,
       ),
       title: Row(
         children: [
@@ -340,8 +348,7 @@ class _SecurityAlertsDashboardState extends State<SecurityAlertsDashboard> {
               color: color.withOpacity(0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child:
-                Icon(Icons.warning_amber_rounded, color: color, size: 22),
+            child: Icon(Icons.warning_amber_rounded, color: color, size: 22),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -361,8 +368,7 @@ class _SecurityAlertsDashboardState extends State<SecurityAlertsDashboard> {
                 const SizedBox(height: 2),
                 Text(
                   alert['description'] ?? 'Immediate attention required.',
-                  style: TextStyle(
-                      fontSize: 12, color: color.withOpacity(0.8)),
+                  style: TextStyle(fontSize: 12, color: color.withOpacity(0.8)),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -375,8 +381,7 @@ class _SecurityAlertsDashboardState extends State<SecurityAlertsDashboard> {
             style: ElevatedButton.styleFrom(
               backgroundColor: color,
               foregroundColor: Colors.white,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
               elevation: 0,
@@ -396,8 +401,7 @@ class _SecurityAlertsDashboardState extends State<SecurityAlertsDashboard> {
       decoration: BoxDecoration(
         color: const Color(0xFF10B981).withOpacity(0.08),
         borderRadius: BorderRadius.circular(14),
-        border:
-            Border.all(color: const Color(0xFF10B981).withOpacity(0.25)),
+        border: Border.all(color: const Color(0xFF10B981).withOpacity(0.25)),
       ),
       child: const Row(
         children: [
@@ -548,8 +552,7 @@ class _SecurityAlertsDashboardState extends State<SecurityAlertsDashboard> {
         itemBuilder: (context, index) {
           final cam = _cameraFeeds[index];
           return GestureDetector(
-            onTap: () =>
-                Navigator.pushNamed(context, '/live-camera-view'),
+            onTap: () => Navigator.pushNamed(context, '/live-camera-view'),
             child: Container(
               width: 185,
               margin: const EdgeInsets.only(right: 12),
@@ -650,8 +653,7 @@ class _SecurityAlertsDashboardState extends State<SecurityAlertsDashboard> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 9),
                         child: Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               cam['name'],
@@ -704,18 +706,15 @@ class _SecurityAlertsDashboardState extends State<SecurityAlertsDashboard> {
 
           return Container(
             decoration: BoxDecoration(
-              color: isDenied
-                  ? Colors.red.withOpacity(0.03)
-                  : Colors.transparent,
+              color:
+                  isDenied ? Colors.red.withOpacity(0.03) : Colors.transparent,
               border: isDenied
-                  ? const Border(
-                      left: BorderSide(color: Colors.red, width: 3))
+                  ? const Border(left: BorderSide(color: Colors.red, width: 3))
                   : null,
               borderRadius: isFirst && isLast
                   ? BorderRadius.circular(16)
                   : isFirst
-                      ? const BorderRadius.vertical(
-                          top: Radius.circular(16))
+                      ? const BorderRadius.vertical(top: Radius.circular(16))
                       : isLast
                           ? const BorderRadius.vertical(
                               bottom: Radius.circular(16))
@@ -724,8 +723,8 @@ class _SecurityAlertsDashboardState extends State<SecurityAlertsDashboard> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 13),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
                   child: Row(
                     children: [
                       // Avatar
@@ -742,9 +741,8 @@ class _SecurityAlertsDashboardState extends State<SecurityAlertsDashboard> {
                           isDenied
                               ? Icons.person_off_outlined
                               : Icons.person_outline,
-                          color: isDenied
-                              ? Colors.red
-                              : const Color(0xFF6B46C1),
+                          color:
+                              isDenied ? Colors.red : const Color(0xFF6B46C1),
                           size: 20,
                         ),
                       ),
