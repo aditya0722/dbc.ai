@@ -21,14 +21,14 @@ class DashboardTabWidget extends StatelessWidget {
   // ── Data ──
   static final List<Map<String, dynamic>> _primaryMetrics = [
     {
-      "title": "Total Payments",
+      "title": "Finance Manager",
       "value": "\$2,450.00",
       "trend": "+12.5%",
       "trendUp": true,
       "route": "/payment-processing-center",
     },
     {
-      "title": "Active Orders",
+      "title": "Active Order",
       "value": "24 Active",
       "trend": "+ 8 today",
       "trendUp": true,
@@ -38,7 +38,25 @@ class DashboardTabWidget extends StatelessWidget {
 
   static final List<Map<String, dynamic>> _managementMetrics = [
     {
-      "title": "Staff",
+      "title": "Finance Manager",
+      "value": "\$2,450.00",
+      "icon": Icons.attach_money,
+      "color": Color.fromARGB(255, 70, 193, 101),
+      "iconBg": Color(0xFFEDE9FE),
+      "valueColor": Color.fromARGB(255, 70, 193, 101),
+      "route": "/payment-processing-center",
+    },
+    {
+      "title": "Bussiness Manager",
+      "value": "Manage your business details",
+      "icon": Icons.business,
+      "color": Color.fromARGB(255, 170, 193, 70),
+      "iconBg": Color(0xFFEDE9FE),
+      "valueColor": Color(0xFF1A1A1A),
+      "route": "/order-management-hub",
+    },
+    {
+      "title": "Staff Manager",
       "value": "15/18 Present",
       "icon": Icons.people,
       "color": Color(0xFF6B46C1),
@@ -47,7 +65,7 @@ class DashboardTabWidget extends StatelessWidget {
       "route": "/staff-management",
     },
     {
-      "title": "Inventory",
+      "title": "Inventory Manager",
       "value": "12 Low Items",
       "icon": Icons.inventory_2,
       "color": Color(0xFFF59E0B),
@@ -56,7 +74,7 @@ class DashboardTabWidget extends StatelessWidget {
       "route": "/inventory-management",
     },
     {
-      "title": "Security",
+      "title": "Security Manager",
       "value": "Active",
       "icon": Icons.verified_user,
       "color": Color(0xFF10B981),
@@ -65,13 +83,13 @@ class DashboardTabWidget extends StatelessWidget {
       "route": "/live-camera-view",
     },
     {
-      "title": "News",
+      "title": "News/Blog",
       "value": "8 New Updates",
       "icon": Icons.article,
       "color": Color(0xFF6B46C1),
       "iconBg": Color(0xFFEDE9FE),
       "valueColor": Color(0xFF6B6B6B),
-      "route": "/news-updates-hub",
+      "route": "/Marketing Manager",
     },
   ];
 
@@ -129,7 +147,7 @@ class DashboardTabWidget extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Management',
+                      const Text('Bussiness Management',
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
@@ -152,21 +170,85 @@ class DashboardTabWidget extends StatelessWidget {
               // Management grid
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                sliver: SliverGrid(
+                sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) =>
-                        _ManagementCard(item: _managementMetrics[index]),
+                    (context, index) {
+                      final item = _managementMetrics[index];
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pushNamed(context, item['route']);
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: Offset(0, 4),
+                                )
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: item['iconBg'],
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    item['icon'],
+                                    color: item['color'],
+                                    size: 26,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item['title'],
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        item['value'],
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: item['valueColor'],
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  size: 16,
+                                  color: Colors.grey.shade400,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                     childCount: _managementMetrics.length,
-                  ),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: isWide ? 4 : 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    mainAxisExtent: 130,
                   ),
                 ),
               ),
-
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
               // Featured banner
